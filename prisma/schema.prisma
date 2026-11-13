@@ -1,0 +1,29 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model SubDao {
+  id           String   @id @default(uuid())
+  slug         String   @unique
+  name         String
+  domain       String?  @unique
+  storageUri   String   // IPFS / Arweave metadata URI
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  members      Member[]
+}
+
+model Member {
+  id           String   @id @default(uuid())
+  subDaoId     String
+  subDao       SubDao   @relation(fields: [subDaoId], references: [id], onDelete: Cascade)
+  walletAddress String  // ERC-1271 Smart Contract Wallet or Passkey Public Key
+  role         String   @default("RESIDENT") // GOVERNING_OFFICER, ADMIN, RESIDENT
+  createdAt    DateTime @default(now())
+}
